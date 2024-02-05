@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Beacon Solver</title>
+    <link rel="stylesheet" href="style.css">
+    
+</head>
+<body>
+    
+    <div id="solve-area">Solve</div>
+    <div id="star-buttons"></div>
+    <div id="stars"></div>
+    <section id="side">
+        <h1>Beacon Solver</h1>
+        <h2>Instructions:</h2>
+        <ul>
+            <li>Use colored buttons to spawn stars</li>
+            <li>Click and drag to move stars</li>
+            <li>Right-click to remove stars</li>
+            <li>Right-click and drag between two stars to create a connection/warp lane between them</li>
+            <li>To activate the solver, drag a connection between the primary star (one circled in the in-game beacon image) and the "Solve" button at the bottom of the area</li>
+        
+        </ul>
+        <h2>Results:</h2>
+        <ul id="results"></ul>
+    </section>
+    <svg xmlns="http://www.w3.org/2000/svg" id="lines"></svg>
+    
+    <script src="main.js" defer></script>
+    <!-- <script src="alg.js" defer></script> -->
+</body>
+</html>
