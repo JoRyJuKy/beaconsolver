@@ -7,12 +7,12 @@ const setLinePositions = (line, x1, y1, x2, y2) => {
 }
 //colors of systems
 const COLORS = {
-    "blue":"#37aed2",
-    "light-blue": "#9dc3d2",
-    "light-yellow":"#ddc383",
-    "yellow": "#e5b534",
-    "orange": "#e4782f",
-    "red": "#f0190a"
+    "blue":"#64c8ff",
+    "light-blue": "#c8e6ff",
+    "light-yellow":"#fff5d2",
+    "yellow": "#fff078",
+    "orange": "#ffa550",
+    "red": "#ff503c"
 }
 
 const STAR_RAD = 18
@@ -34,11 +34,11 @@ let starList = new Map()
 Object.entries(COLORS).forEach(([color, hex]) => {
     let button = document.createElement("button")
     //capitalize text, replace for special case with Light-Yellow
-    button.innerText = color[0].toUpperCase()+color.slice(1).replace("-y", " Y")
+    button.innerText = color[0].toUpperCase()+color.slice(1).replace("-y", " Y").replace("-b", " B")
     button.style.backgroundColor = hex
 
     //setup onclick fn
-    button.onclick = (btnEv) => {
+    button.onclick = (_) => {
         //setup star element
         let star = document.createElement("div")
         starList.set(star, new Map())

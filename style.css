@@ -6,11 +6,17 @@
     user-select:text;
     height: 800px;
 }
+h3 {
+    margin-bottom: 0px;
+}
+ul {
+    margin-top: 0px;
+}
 #side>*{
     margin: 5px;
 }
 #results {
-    height: 425px;
+    height: 400px;
     overflow-y: auto;
 }
 #results>li {
