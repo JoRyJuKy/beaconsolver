@@ -1,4 +1,4 @@
-import { solveBeacon } from "//search_algorithm.js"
+import { solveBeacon } from "./search_algorithm.js"
 
 //colors of systems
 const COLORS = {
