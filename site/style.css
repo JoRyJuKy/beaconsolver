@@ -1,0 +1,105 @@
+:root {
+    --area-size: 750px;
+    --star-size: 36px;
+    --white-color: aliceblue;
+}
+
+html {
+    user-select: none;
+    color: var(--white-color);
+    background-color: #0c090a;
+    font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin-bottom: 0px;
+}
+h1 {
+    font-size: 40px;
+}
+h3 {
+    margin: 5px;
+    margin-left: 0px;
+}
+#main-container {
+    display: flex;
+    flex-direction: row;
+}
+
+#side {
+    user-select:text;
+    width: 300px;
+    max-height: calc(var(--area-size) + 40px + 1px + 2px); /* +40px for the buttons, 1px and 2px for the borders*/
+    display: flex;
+    flex-direction: column;
+}
+#side>*{
+    margin: 2px;
+    margin-left: 5px;
+}
+
+#results {
+    flex-grow: 1;
+    overflow-y: auto;
+}
+#results>li {
+    user-select: all;
+    font-size: large;
+}
+
+#star-buttons {
+    width: var(--area-size);
+    display: flex;
+    flex-direction: row;
+    border: 1px solid var(--white-color);
+    border-bottom: none;
+}
+#star-buttons>button{
+    height: 40px;
+    border: none;
+    flex-grow: 1;
+    font-size: x-large;
+}
+
+#stars {
+    width: var(--area-size);
+    height: var(--area-size);
+    border: var(--white-color) 1px solid;
+
+}
+#stars>*{
+    position: absolute;
+    width: var(--star-size);
+    height: var(--star-size);
+    border-radius: 100%;
+    z-index: 1;
+}
+
+#solve-area {
+    position: relative;
+    width: 100px;
+    height: 40px;
+    top: calc(var(--area-size) - 40px);
+    left: calc(var(--area-size) / 2 - 50px);
+
+    font-size: xx-large;
+    background-color:var(--white-color);
+    color: black;
+    border-radius: 0px;
+    
+    z-index: 1;
+    
+    text-align: center;
+    vertical-align: middle;
+    line-height: 40px;
+}
+
+#lines {
+    position:absolute;
+    top:0;
+    left:0;
+    width: 1px;
+    height: 1px;
+    overflow: visible;
+    stroke:var(--white-color);
+    stroke-width: 2px;
+}
+
+
