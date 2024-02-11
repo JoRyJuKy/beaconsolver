@@ -14,9 +14,16 @@ const STAR_RAD = 18
 const buttons = document.getElementById("star-buttons")
 const stars = document.getElementById("stars")
 const lines = document.getElementById("lines")
-const solveArea = document.getElementById("solve-area")
 const resultsArea = document.getElementById("results")
 const editLine = document.createElementNS("http://www.w3.org/2000/svg", "line"); lines.appendChild(editLine)
+const primaryStar = document.createElement("div"); primaryStar.id = "primary-star"
+
+//state vars
+let movingStar = undefined
+let movingMouseOffset = [0,0]
+let lastM2edStar = undefined
+let lastRemovedPosition = [0,0]
+let starList = new Map()
 
 //helper function for settingm the positions of a svg line
 const setLinePositions = (line, x1, y1, x2, y2) => {
@@ -26,13 +33,45 @@ const setLinePositions = (line, x1, y1, x2, y2) => {
     line.setAttribute("y2", y2)
 }
 
-//state vars
-let movingStar = undefined
-let movingMouseOffset = [0,0]
-let lastM2edStar = undefined
-let lastRemovedPosition = [0,0]
+//updates the results section on the page
+const updateResults = () => {
+    //remove any existing results from previous solves
+    while (resultsArea.lastChild) resultsArea.removeChild(resultsArea.lastChild)
 
-let starList = new Map()
+    //add any results
+    for (const result of solveBeacon(primaryStar.parentElement, starList)) {
+        //create a list element, which contains a code element, which contains the name of the found system
+        const codeBlock = document.createElement("code"); codeBlock.textContent = result
+        const listItem = document.createElement("li");    listItem.appendChild(codeBlock)
+
+        //append it to the results area
+        resultsArea.appendChild(listItem)
+    }
+
+    //if the first result isn't the last result, there were multiple results, warn the user
+    if (resultsArea.firstChild != resultsArea.lastChild) {
+        const warningsvg = document.createElement("img")
+        const p = document.createElement("p");
+        warningsvg.setAttribute("src", "https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/26a0.svg")
+        warningsvg.setAttribute("height", 30)
+        p.innerHTML = "Multiple results found!<br>Check for the right one ingame."
+        resultsArea.insertBefore(p, resultsArea.firstChild)
+        resultsArea.insertBefore(warningsvg, p)
+        
+    }
+
+    //if no results were found, warn the user
+    if (resultsArea.firstChild == null) {
+        const warningsvg = document.createElement("img")
+        const p = document.createElement("p");
+        warningsvg.setAttribute("src", "https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/26a0.svg")
+        warningsvg.setAttribute("height", 30)
+        warningsvg.style.paddingBottom = "16px"
+        p.innerHTML = "No results found! Make sure you've inputted the beacon correctly."
+        resultsArea.insertBefore(p, resultsArea.firstChild)
+        resultsArea.insertBefore(warningsvg, p)
+    }
+}
 
 //set up star buttons
 Object.entries(COLORS).forEach(([color, hex]) => {
@@ -52,8 +91,14 @@ Object.entries(COLORS).forEach(([color, hex]) => {
         star.style.left = button.offsetLeft + ((button.offsetWidth- star.offsetWidth) / 2) +"px" //position in middle of btn
         star.style.top = button.offsetTop + button.offsetHeight + 6 + "px"
 
+        //if there is no primary star yet, this one will do :)
+        if (primaryStar.parentElement == null) { 
+            star.appendChild(primaryStar)
+            updateResults()
+        }
+
         //on click setup: set this as currently moving star, set offset to click offset from topleft
-        star.onmousedown = (starEv) => {
+        star.onmousedown = starEv => {
             if (starEv.button == 0) { //handle m1s (0 is m1 because javascript)
                 movingStar = star
                 movingMouseOffset = [star.offsetLeft - starEv.x, star.offsetTop - starEv.y]
@@ -62,11 +107,17 @@ Object.entries(COLORS).forEach(([color, hex]) => {
             }
             
         }
-        star.onmouseup = (starEv) => {
+        star.onmouseup = starEv => {
             if (starEv.button != 2) return //dont handle non-m2s
             if (starEv.shiftKey) return // dont handle debug stuff
 
             if (lastM2edStar == star) { //if just rightclicking on one star, remove it
+                //make sure primary star isn't removed
+                if (primaryStar.parentElement == star) {
+                    alert("You can't remove the primary star!\nDouble-click another star to set it as primary.")
+                    return
+                }
+
                 star.remove()
                 lastRemovedPosition = [starEv.x, starEv.y]
                 starList.get(star).forEach(([_, line], link) => {
@@ -96,7 +147,10 @@ Object.entries(COLORS).forEach(([color, hex]) => {
                     starList.get(lastM2edStar).set(star,         ["2",line])
                 }
             }
+            //in both cases, the results need to be updated
+            updateResults()
         }
+        star.ondblclick = () => { star.appendChild(primaryStar); updateResults() }
         star.oncontextmenu = ev => ev.shiftKey   
     }
     buttons.appendChild(button)
@@ -107,49 +161,29 @@ document.onmouseup = () => {
     lastM2edStar = undefined
     setLinePositions(editLine, 0,0,0,0)
 }
-solveArea.onmouseup = ev => {
-    if (ev.button != 2) return
-    if (lastM2edStar == undefined) return
-
-    //remove any existing results from previous solves
-    while (resultsArea.lastChild) resultsArea.removeChild(resultsArea.lastChild)
-
-    //add any results
-    for (const result of solveBeacon(lastM2edStar, starList)) {
-        //create a list element, which contains a code element, which contains the name of the found system
-        const codeBlock = document.createElement("code")
-        codeBlock.textContent = result
-        const listItem = document.createElement("li")
-        listItem.appendChild(codeBlock)
-
-        //append it to the results area
-        resultsArea.append(listItem)
-    }
-}
-
 document.onmousemove = (ev) => {
     // if moving star is active
     if (movingStar != undefined) {
-        //if cursor out of bounds of stars div deactivate movement
-        let starX = ev.x + movingMouseOffset[0]
-        let starY = ev.y + movingMouseOffset[1]
+        //if cursor out of bounds of stars div, don't move:
+        const starX = ev.x + movingMouseOffset[0]
+        const starY = ev.y + movingMouseOffset[1]
 
-        if (
-               starX < stars.offsetLeft
-            || starX > stars.offsetLeft + stars.offsetWidth  - 30
-            || starY < stars. offsetTop
-            || starY > stars. offsetTop  + stars.offsetHeight - 30
+        if ( // as long as star X is in bound
+            starX > stars.offsetLeft 
+            && starX < stars.offsetLeft + stars.offsetWidth - (STAR_RAD*2)
         ) {
-            return
+            movingStar.style.left = starX + "px"
+            starList.get(movingStar).forEach(([n, link],_ ) => link.setAttribute("x"+n, starX+STAR_RAD))
         }
 
-        movingStar.style.left = starX + "px"
-        movingStar.style.top = starY + "px" 
-        
-        starList.get(movingStar).forEach(([n, link],_ ) => {
-            link.setAttribute("x"+n, starX+STAR_RAD)
-            link.setAttribute("y"+n, starY+STAR_RAD)
-        })
+        // as long as star Y is in bound
+        if (
+            starY > stars.offsetTop
+            && starY < stars.offsetTop + stars.offsetHeight - (STAR_RAD*2)
+        ) {
+            movingStar.style.top = starY + "px"
+            starList.get(movingStar).forEach(([n, link],_ ) => link.setAttribute("y"+n, starY+STAR_RAD))
+        }
     }
     if (lastM2edStar != undefined) setLinePositions(
         editLine, ev.x, ev.y,
@@ -158,7 +192,6 @@ document.onmousemove = (ev) => {
     )
     
 }
-
 document .oncontextmenu = ev => {
     //disable context menu by returning false if:
         // shift key is pressed (debug purposes)
@@ -172,5 +205,4 @@ document .oncontextmenu = ev => {
         )
     )
 }
-solveArea.oncontextmenu = ev => ev.shiftKey
 stars    .oncontextmenu = ev => ev.shiftKey
