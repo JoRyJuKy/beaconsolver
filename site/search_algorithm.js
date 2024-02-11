@@ -9,7 +9,7 @@ const SPECTRAL_CLASSES = {
 }
 
 //fetch the map data, determine neighbor class counts
-const MAP_DATA = await (await fetch("/map.json")).json()
+const MAP_DATA = await (await fetch("./map.json")).json()
 for (let systemName in MAP_DATA) {
     let counts = {"B":0, "A":0, "F":0, "G":0, "K":0, "M":0}
     MAP_DATA[systemName].neighbors.map(name => MAP_DATA[name].class).forEach(cls => counts[cls] = counts[cls] + 1)
