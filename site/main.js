@@ -1,15 +1,6 @@
+import { COLORS, STAR_RAD } from "./constants.js"
 import { solveBeacon } from "./search_algorithm.js"
-
-//colors of systems
-const COLORS = {
-    "blue":"#64c8ff",
-    "light-blue": "#c8e6ff",
-    "light-yellow":"#fff5d2",
-    "yellow": "#fff078",
-    "orange": "#ffa550",
-    "red": "#ff503c"
-}
-const STAR_RAD = 18
+import { detectBeacon } from "./imageDetector.js"
 
 const buttons = document.getElementById("star-buttons")
 const stars = document.getElementById("stars")
@@ -206,3 +197,68 @@ document .oncontextmenu = ev => {
     )
 }
 stars    .oncontextmenu = ev => ev.shiftKey
+
+const openModalButton = document.getElementById("open-image-modal")
+const closeModalButton = document.getElementById("close-image-modal")
+const modal = document.getElementById("image-modal")
+const uploadArea = document.getElementById("upload-area")
+const imageUploader = document.getElementById("modal-image-uploader")
+
+//setup opencv image dection stuff
+const openCVReady = () => {
+    //get a list of elements that we need to blur when the modal opens
+    const blurElements = Array.from(document.body.children)
+        .filter(child => child.id != "image-modal")
+
+    openModalButton.onclick = () => {
+        if (modal.open) return //if modal is already open do nothing
+        
+        modal.showModal()
+        blurElements //add blur effect
+            .forEach(child => child.classList.add("blur"))
+    }
+    closeModalButton.onclick = () => {
+        if (!modal.open) return // if modal is not open do nothing
+
+        modal.close()
+        blurElements //remove blur effect
+            .forEach(child => child.classList.add("blur-removing"))
+        setTimeout(
+            () => blurElements.forEach(child => {
+                child.classList.remove("blur")
+                child.classList.remove("blur-removing")
+            }),
+            1000 * 0.3 //.3 seconds
+        )
+    }
+    uploadArea.onclick = () => imageUploader.click()
+
+    const processFile = (file) => {
+        const fileReader = new FileReader()
+        fileReader.onload = () => {
+            const results = detectBeacon(fileReader.result)
+        }
+        fileReader.readAsDataURL(file)
+    }
+
+    imageUploader.onchange = (event) => processFile(event.target.files[0])
+    document.onpaste = (event) => {
+        if (!modal.open) return
+        event.preventDefault()
+        
+        if (event.clipboardData.files.length == 0) return
+        const file = event.clipboardData.files[0]
+        if (!file.type.startsWith("image/")) return
+
+        processFile(file)
+    }
+
+    openModalButton.innerText = "Load From Image"
+}
+
+//create script element to load opencv
+const openCVScriptElement = document.createElement("script")
+Module.onRuntimeInitialized = openCVReady
+openCVScriptElement.async = true
+openCVScriptElement.src = "https://docs.opencv.org/4.9.0/opencv.js"
+document.body.appendChild(openCVScriptElement)

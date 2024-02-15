@@ -9,6 +9,10 @@
     <meta content="#66217c" data-react-helmet="true" name="theme-color" />
     <title>Beacon Solver</title>
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="modal.css">
+
+    <!-- import material icons -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
     
 </head>
 <body>
@@ -28,18 +32,35 @@
                 <li>Right-click and drag between two stars to create/remove a connection between them</li>
                 <li>Double-click to set the primary star</li>
                 <li>The position of the stars doesn't matter, just the connections</li>
+                <li>
+                    Import a beacon from an image: <br>
+                    <button id="open-image-modal">Loading...</button>
+                </li>
             </ul>
             <h2>Results:</h2>
             <ul id="results"></ul>
         </section>
     </div>
+
+    <dialog id="image-modal">
+        <h2>Image Detector</h2>
+        <p>Paste an image below, or click to upload.</p>
+        <div id="upload-area"></div>
+        <button id="close-image-modal" class="material-symbols-outlined">close</button>
+        <input 
+            type="file" 
+            id="modal-image-uploader"
+            accept="image/jpeg, image/png, image/jpg"
+        >
+    </dialog>
     
     <svg xmlns="http://www.w3.org/2000/svg" id="lines"></svg>
     
-    <script src="main.js" type="module" defer></script>
     
-    Found a bug, or need help? Use the <a href="https://github.com/JoRyJuKy/beaconsolver">GitHub</a>, or send me a message/DM on Discord: <code>joryjuky</code><br>
-    Credit to <a href="https://github.com/Aloroid">Megustral</a> for the system data, as well as BinaryTimeLord and <a href="https://www.roblox.com/games/10097597282/Starscape-Beacons">R_zgriz's Game</a> for inspiration/ideas <br>
+    <p style="margin: 0px;">
+        Found a bug, or need help? Use the <a href="https://github.com/JoRyJuKy/beaconsolver">GitHub</a>, or send me a message/DM on Discord: <code>joryjuky</code><br>
+        Credit to <a href="https://github.com/Aloroid">Megustral</a> for the system data, as well as BinaryTimeLord and <a href="https://www.roblox.com/games/10097597282/Starscape-Beacons">R_zgriz's Game</a> for inspiration/ideas <br>
+    </p>
     <h3>Update Log:</h3>
     <ul>
         <li><code>v1.1.0</code>: Does not list non-wild systems as results for beacons. Also updated the instructions to make the ability to remove links a bit more obvious</li>
@@ -47,5 +68,8 @@
         <li><code>v1.1.2</code>: Internal refactor, should make further updates easier</li>
         <li><code>v1.2.0</code>: Change solver to use a primary star (changed with double-clicking), update results to have warnings.</li>
     </ul>
+    <!-- preparing for loading OpenCV -->
+    <script> let Module = {} </script>
+    <script src="main.js" type="module" defer></script>
 </body>
 </html>

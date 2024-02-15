@@ -1,12 +1,4 @@
-// convert div colors to star classes
-const SPECTRAL_CLASSES = {
-    "blue": "B",
-    "light-blue": "A",
-    "light-yellow": "F",
-    "yellow": "G",
-    "orange": "K",
-    "red": "M"
-}
+import { SPECTRAL_CLASSES } from "./constants.js"
 
 //fetch the map data, determine neighbor class counts
 const MAP_DATA = await (await fetch("./map.json")).json()

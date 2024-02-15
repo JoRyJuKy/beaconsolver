@@ -1,0 +1,19 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Testing</title>
+</head>
+<body>
+    <div id="source-images"></div>
+    <script>
+        let Module = {
+            onRuntimeInitialized() {
+                import("./test.js")
+            }
+        }
+    </script>
+    <script async src="https://docs.opencv.org/4.9.0/opencv.js"></script>
+
+</body>
+</html>

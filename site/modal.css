@@ -1,0 +1,74 @@
+.blur {
+    filter: blur(2px);
+    transition: filter 0.2s ease-in;
+}
+.blur-removing {
+    filter: blur(0px);
+}
+
+#open-image-modal {
+    width: 95%;
+    height: 35px;
+    color: var(--white-color);
+    background-color: #141414;
+    border: var(--white-color) 1px solid;
+    font-size: larger;
+    transition: 0.2s;
+}
+#open-image-modal:hover {
+    background-color: #090909;
+}
+
+#image-modal {
+    margin: 0px;
+    padding: 8px;
+    
+    width: 600px;
+    height: 400px;
+    position: absolute;
+    left: calc(50% - (600px/2));
+    top: 50px;
+    
+    background-color: #0c090a;
+    border: var(--white-color) 1px solid;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    z-index: -1;
+    opacity: 0;
+    transition: opacity 0.2s ease-in;
+}
+#image-modal[open] {
+    opacity: 1;
+}
+#image-modal > * {
+    color: var(--white-color);
+    margin: 0px;
+    text-align: center;
+}
+
+#upload-area {
+    width: 80%;
+    height: 70%;
+    margin-top: 20px;
+    border: gray dashed 2px;
+}
+#modal-image-uploader { display: none; }
+
+#close-image-modal {
+    background-color: #141414;
+    color: var(--white-color);
+    border: var(--white-color) 1px solid;
+    padding: 0px;
+    width: 32px;
+    height: 32px;
+
+    position: absolute;
+    right: 8px;
+    top: 8px;
+}
+#close-image-modal:hover {
+    background-color: #090909;
+}
