@@ -24,6 +24,7 @@
         </section>
         <section id="side">
             <h1>Beacon Solver</h1>
+            <button id="open-image-modal">Loading...</button>
             <h2>Instructions:</h2>
             <ul>
                 <li>Use colored buttons to spawn stars</li>
@@ -32,10 +33,11 @@
                 <li>Right-click and drag between two stars to create/remove a connection between them</li>
                 <li>Double-click to set the primary star</li>
                 <li>The position of the stars doesn't matter, just the connections</li>
-                <li>
+                <li>Try out the image detector for faster input and solving!</li>
+                <!-- <li>
                     Import a beacon from an image: <br>
                     <button id="open-image-modal">Loading...</button>
-                </li>
+                </li> -->
             </ul>
             <h2>Results:</h2>
             <ul id="results"></ul>
@@ -61,8 +63,8 @@
             <p>
                 <br><br><br>
                 Results found! Make sure you double-check them, image detectors tend to be prone to error. <br> <br>
-                If your results are completely wrong, submit an issue on the <a href="https://github.com/JoRyJuKy/beaconsolver/issues">GitHub</a>, or send <code>joryjuky</code> a DM on Discord with the beacon image attached. <br><br>
-                Press the close button to return to the solver.
+                If your results are completely wrong, submit an issue on the <a href="https://github.com/JoRyJuKy/beaconsolver/issues">GitHub</a>, or send me (<code>joryjuky</code>) a DM on Discord with the beacon image attached. <br><br>
+                Press the <b>X</b> button or <kbd>Esc</kbd> to return to the solver.
             </p>
         </div>
     </dialog>
@@ -74,11 +76,12 @@
     
     
     <p style="margin: 0px;">
-        Found a bug, or need help? Use the <a href="https://github.com/JoRyJuKy/beaconsolver">GitHub</a>, or send me a message/DM on Discord: <code>joryjuky</code><br>
+        Found a bug, or need help? Use the <a href="https://github.com/JoRyJuKy/beaconsolver">GitHub</a>, or send me (<code>joryjuky</code>) a message/DM on Discord.<br>
         Credit to <a href="https://github.com/Aloroid">Megustral</a> for the system data, as well as BinaryTimeLord and <a href="https://www.roblox.com/games/10097597282/Starscape-Beacons">R_zgriz's Game</a> for inspiration/ideas <br>
     </p>
     <h3 style="margin-bottom: 0px;">Update Log:</h3>
     <ul style="margin-top: 0px;">
+        <li><code>v1.3.1</code>: Small bug-fixes to the image detector, minor UI tweaks.</li>
         <li><code>v1.3.0</code>: Added an image detector for faster beacon solving! Try it out with the button in the instructions section.</li>
         <li><code>v1.2.0</code>: Change solver to use a primary star (changed with double-clicking), update results to have warnings.</li>
         <li><code>v1.1.2</code>: Internal refactor, should make further updates easier</li>

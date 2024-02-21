@@ -8,13 +8,15 @@
 
 
 #open-image-modal {
-    width: 95%;
-    height: 35px;
+    /* width: 95%; */
+    width: 260px;
+    height: 45px;
     color: var(--white-color);
     background-color: #141414;
     border: var(--white-color) 1px solid;
-    font-size: larger;
+    font-size: 22px;
     transition: 0.2s;
+    margin-left: 8px;
 }
 #open-image-modal:hover {
     background-color: #090909;

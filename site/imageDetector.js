@@ -145,6 +145,7 @@ const detectBeacon = (urlData) => new Promise(resolve => {
                 )
                 .map(({x, y}) => toKey(x, y))
         })
+        lineMask.delete() //free up memory, won't be needed here on out
         const primaryCircle = circles
             .map(circle => {
                 const expandedRadius = circle.r * 3.85

@@ -236,22 +236,18 @@ toggleVisibility(workingState, finishedState)
 //setup opencv image dection stuff
 const openCVReady = () => {
     openModalButton.onclick = () => {
-        console.log(starList)
         if (modal.open) return //if modal is already open do nothing
         
         modal.showModal()
         togglePageBlur(true)
     }
-    closeModalButton.onclick = () => {
-        if (!modal.open) return // if modal is not open do nothing
-
+    modal.onclose = () => {
         if (window.getComputedStyle(workingState ).display == "flex") toggleVisibility(workingState,  initialState)
         if (window.getComputedStyle(finishedState).display == "flex") toggleVisibility(finishedState, initialState)
-
-        modal.close()
         togglePageBlur(false)
     }
-    uploadArea.onclick = () => imageUploader.click()
+    closeModalButton.onclick = () => modal.close()
+    uploadArea      .onclick = () => imageUploader.click()
 
     const handleBeaconResults = (results) => {
         //first, clear the existing starlist and remove all existing stars
