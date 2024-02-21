@@ -1,12 +1,12 @@
-import { COLORS, STAR_RAD } from "./constants.js"
+import { COLORS, STAR_RAD, setLinePositions } from "./constants_helpers.js"
 import { solveBeacon } from "./search_algorithm.js"
 import { detectBeacon } from "./imageDetector.js"
 
 const buttons = document.getElementById("star-buttons")
 const stars = document.getElementById("stars")
-const lines = document.getElementById("lines")
+const lines = document.getElementById("main-lines")
 const resultsArea = document.getElementById("results")
-const editLine = document.createElementNS("http://www.w3.org/2000/svg", "line"); lines.appendChild(editLine)
+const editLine = document.getElementById("edit-line")
 const primaryStar = document.createElement("div"); primaryStar.id = "primary-star"
 
 //state vars
@@ -15,14 +15,6 @@ let movingMouseOffset = [0,0]
 let lastM2edStar = undefined
 let lastRemovedPosition = [0,0]
 let starList = new Map()
-
-//helper function for settingm the positions of a svg line
-const setLinePositions = (line, x1, y1, x2, y2) => {
-    line.setAttribute("x1", x1)
-    line.setAttribute("y1", y1)
-    line.setAttribute("x2", x2)
-    line.setAttribute("y2", y2)
-}
 
 //updates the results section on the page
 const updateResults = () => {
@@ -64,6 +56,74 @@ const updateResults = () => {
     }
 }
 
+//creates a new star html elements, handles all the onclick behavior
+const createStarElement = (color, x, y) => {
+    const star = document.createElement("div")
+    star.className = color
+    star.style.backgroundColor = COLORS[color]
+    stars.appendChild(star)
+    star.style.left = x + "px"
+    star.style.top = y + "px"
+
+    //on click setup: set this as currently moving star, set offset to click offset from topleft
+    star.onmousedown = starEv => {
+        if (starEv.button == 0) { //handle m1s (0 is m1 because javascript)
+            movingStar = star
+            movingMouseOffset = [star.offsetLeft - starEv.x, star.offsetTop - starEv.y]
+        } else if (starEv.button == 2 && !starEv.shiftKey) { //handle m2s (not if shift is pressed tho, want to allow ctx menu still)
+            lastM2edStar = star
+        }
+        
+    }
+    star.onmouseup = starEv => {
+        if (starEv.button != 2) return //dont handle non-m2s
+        if (starEv.shiftKey) return // dont handle debug stuff
+
+        if (lastM2edStar == star) { //if just rightclicking on one star, remove it
+            //make sure primary star isn't removed
+            if (primaryStar.parentElement == star) {
+                alert("You can't remove the primary star!\nDouble-click another star to set it as primary.")
+                return
+            }
+
+            star.remove()
+            lastRemovedPosition = [starEv.x, starEv.y]
+            starList.get(star).forEach(([_, line], link) => {
+                line.remove()
+                starList.get(star).delete(link)
+                starList.get(link).delete(star)
+                
+            })
+            starList.delete(star)
+        } else {
+            //if line already exists, remove it
+            if (starList.get(star).get(lastM2edStar) != undefined) {
+                starList.get(star        ).get(lastM2edStar)[1].remove()
+                starList.get(star        ).delete(lastM2edStar)
+                starList.get(lastM2edStar).delete(star        )
+            } else { //otherwise create line
+                let line = document.createElementNS("http://www.w3.org/2000/svg", "line")
+                setLinePositions(
+                    line,
+                    star        .offsetLeft + STAR_RAD,
+                    star        .offsetTop  + STAR_RAD,
+                    lastM2edStar.offsetLeft + STAR_RAD,
+                    lastM2edStar.offsetTop  + STAR_RAD
+                )
+                lines.appendChild(line)
+                starList.get(star        ).set(lastM2edStar, ["1",line])
+                starList.get(lastM2edStar).set(star,         ["2",line])
+            }
+        }
+        //in both cases, the results need to be updated
+        updateResults()
+    }
+    star.ondblclick = () => { star.appendChild(primaryStar); updateResults() }
+    star.oncontextmenu = ev => ev.shiftKey
+
+    return star
+}
+
 //set up star buttons
 Object.entries(COLORS).forEach(([color, hex]) => {
     let button = document.createElement("button")
@@ -73,76 +133,18 @@ Object.entries(COLORS).forEach(([color, hex]) => {
 
     //setup onclick fn
     button.onclick = (_) => {
-        //setup star element
-        let star = document.createElement("div")
-        starList.set(star, new Map())   
-        star.className = color
-        star.style.backgroundColor = hex
-        stars.appendChild(star)
-        star.style.left = button.offsetLeft + ((button.offsetWidth- star.offsetWidth) / 2) +"px" //position in middle of btn
-        star.style.top = button.offsetTop + button.offsetHeight + 6 + "px"
-
+        const star = createStarElement(
+            color, 
+            button.offsetLeft + (button.offsetWidth / 2) - STAR_RAD,
+            button.offsetTop + button.offsetHeight + 6
+        )
+        starList.set(star, new Map())
+        
         //if there is no primary star yet, this one will do :)
         if (primaryStar.parentElement == null) { 
             star.appendChild(primaryStar)
             updateResults()
         }
-
-        //on click setup: set this as currently moving star, set offset to click offset from topleft
-        star.onmousedown = starEv => {
-            if (starEv.button == 0) { //handle m1s (0 is m1 because javascript)
-                movingStar = star
-                movingMouseOffset = [star.offsetLeft - starEv.x, star.offsetTop - starEv.y]
-            } else if (starEv.button == 2 && !starEv.shiftKey) { //handle m2s (not if shift is pressed tho, want to allow ctx menu still)
-                lastM2edStar = star
-            }
-            
-        }
-        star.onmouseup = starEv => {
-            if (starEv.button != 2) return //dont handle non-m2s
-            if (starEv.shiftKey) return // dont handle debug stuff
-
-            if (lastM2edStar == star) { //if just rightclicking on one star, remove it
-                //make sure primary star isn't removed
-                if (primaryStar.parentElement == star) {
-                    alert("You can't remove the primary star!\nDouble-click another star to set it as primary.")
-                    return
-                }
-
-                star.remove()
-                lastRemovedPosition = [starEv.x, starEv.y]
-                starList.get(star).forEach(([_, line], link) => {
-                    line.remove()
-                    starList.get(star).delete(link)
-                    starList.get(link).delete(star)
-                    
-                })
-                starList.delete(star)
-            } else {
-                //if line already exists, remove it
-                if (starList.get(star).get(lastM2edStar) != undefined) {
-                    starList.get(star        ).get(lastM2edStar)[1].remove()
-                    starList.get(star        ).delete(lastM2edStar)
-                    starList.get(lastM2edStar).delete(star        )
-                } else { //otherwise create line
-                    let line = document.createElementNS("http://www.w3.org/2000/svg", "line")
-                    setLinePositions(
-                        line,
-                        star        .offsetLeft + STAR_RAD,
-                        star        .offsetTop  + STAR_RAD,
-                        lastM2edStar.offsetLeft + STAR_RAD,
-                        lastM2edStar.offsetTop  + STAR_RAD
-                    )
-                    lines.appendChild(line)
-                    starList.get(star        ).set(lastM2edStar, ["1",line])
-                    starList.get(lastM2edStar).set(star,         ["2",line])
-                }
-            }
-            //in both cases, the results need to be updated
-            updateResults()
-        }
-        star.ondblclick = () => { star.appendChild(primaryStar); updateResults() }
-        star.oncontextmenu = ev => ev.shiftKey   
     }
     buttons.appendChild(button)
 })
@@ -164,7 +166,7 @@ document.onmousemove = (ev) => {
             && starX < stars.offsetLeft + stars.offsetWidth - (STAR_RAD*2)
         ) {
             movingStar.style.left = starX + "px"
-            starList.get(movingStar).forEach(([n, link],_ ) => link.setAttribute("x"+n, starX+STAR_RAD))
+            starList.get(movingStar).forEach(([n, link],_ ) => link.setAttribute("x"+n, starX+STAR_RAD+8))
         }
 
         // as long as star Y is in bound
@@ -173,17 +175,17 @@ document.onmousemove = (ev) => {
             && starY < stars.offsetTop + stars.offsetHeight - (STAR_RAD*2)
         ) {
             movingStar.style.top = starY + "px"
-            starList.get(movingStar).forEach(([n, link],_ ) => link.setAttribute("y"+n, starY+STAR_RAD))
+            starList.get(movingStar).forEach(([n, link],_ ) => link.setAttribute("y"+n, starY+STAR_RAD+8))
         }
     }
     if (lastM2edStar != undefined) setLinePositions(
-        editLine, ev.x, ev.y,
+        editLine, ev.x-8, ev.y-8 + window.scrollY,
         lastM2edStar.offsetLeft + STAR_RAD,
         lastM2edStar.offsetTop  + STAR_RAD    
     )
     
 }
-document .oncontextmenu = ev => {
+document.oncontextmenu = ev => {
     //disable context menu by returning false if:
         // shift key is pressed (debug purposes)
         // hacky fix for if a system was just removed with rclick
@@ -196,31 +198,27 @@ document .oncontextmenu = ev => {
         )
     )
 }
-stars    .oncontextmenu = ev => ev.shiftKey
+stars.oncontextmenu = ev => ev.shiftKey
 
 const openModalButton = document.getElementById("open-image-modal")
 const closeModalButton = document.getElementById("close-image-modal")
 const modal = document.getElementById("image-modal")
 const uploadArea = document.getElementById("upload-area")
 const imageUploader = document.getElementById("modal-image-uploader")
+//get the divs for the modal state, for toggling them on/off
+const initialState  = document.getElementById("initial-state" )
+const workingState  = document.getElementById("working-state" )
+const finishedState = document.getElementById("finished-state")
 
-//setup opencv image dection stuff
-const openCVReady = () => {
-    //get a list of elements that we need to blur when the modal opens
-    const blurElements = Array.from(document.body.children)
-        .filter(child => child.id != "image-modal")
-
-    openModalButton.onclick = () => {
-        if (modal.open) return //if modal is already open do nothing
-        
-        modal.showModal()
+//get a list of elements that we need to blur when the modal opens
+const blurElements = Array.from(document.body.children)
+    .filter(child => child.id != "image-modal")
+//toggles the page blur on or off
+const togglePageBlur = (onOff) => {
+    if (onOff) {
         blurElements //add blur effect
             .forEach(child => child.classList.add("blur"))
-    }
-    closeModalButton.onclick = () => {
-        if (!modal.open) return // if modal is not open do nothing
-
-        modal.close()
+    } else {
         blurElements //remove blur effect
             .forEach(child => child.classList.add("blur-removing"))
         setTimeout(
@@ -231,12 +229,75 @@ const openCVReady = () => {
             1000 * 0.3 //.3 seconds
         )
     }
+}
+const toggleVisibility = (...elements) => elements.forEach(element => element.style.display = element.style.display == "none" ? "flex" : "none")
+toggleVisibility(workingState, finishedState)
+
+//setup opencv image dection stuff
+const openCVReady = () => {
+    openModalButton.onclick = () => {
+        console.log(starList)
+        if (modal.open) return //if modal is already open do nothing
+        
+        modal.showModal()
+        togglePageBlur(true)
+    }
+    closeModalButton.onclick = () => {
+        if (!modal.open) return // if modal is not open do nothing
+
+        if (window.getComputedStyle(workingState ).display == "flex") toggleVisibility(workingState,  initialState)
+        if (window.getComputedStyle(finishedState).display == "flex") toggleVisibility(finishedState, initialState)
+
+        modal.close()
+        togglePageBlur(false)
+    }
     uploadArea.onclick = () => imageUploader.click()
+
+    const handleBeaconResults = (results) => {
+        //first, clear the existing starlist and remove all existing stars
+        while (stars.lastChild) stars.removeChild(stars.lastChild) //remove existing stars
+        while (lines.lastChild) lines.removeChild(lines.lastChild) //remove existing lines
+        starList = new Map()
+
+        //then, create all the new stars and add em to the list
+        Object.entries(results).forEach(([rawPos, data]) => {
+            const star = createStarElement(data.class, ...rawPos.split("_").map(Number).map(v => v-8))
+            star.__rawPos = rawPos // hacky thing to make finding it later easier
+            starList.set(star, new Map())
+            if (data.primary == true) star.appendChild(primaryStar)
+        })
+
+        //then, add all the lines
+        for (const [star, connectionMap] of starList) {
+            const starConnections = results[star.__rawPos].connections
+            starConnections.forEach(connectionRawPos => {
+                // find the neighbor element by filtering by its rawpos element
+                const connection = Array.from(stars.children)
+                    .filter(elm => connectionRawPos == elm.__rawPos)[0]
+                if (connectionMap.has(connection)) return // if line already handled skip
+                
+                const line = document.createElementNS("http://www.w3.org/2000/svg", "line")
+                setLinePositions(
+                    line,
+                    connection.offsetLeft + STAR_RAD,
+                    connection.offsetTop  + STAR_RAD,
+                          star.offsetLeft + STAR_RAD,
+                          star.offsetTop  + STAR_RAD
+                )
+                lines.appendChild(line)
+                starList.get(connection).set(star, ["1", line])
+                connectionMap.set(connection,      ["2", line])
+            })
+        }
+    }
 
     const processFile = (file) => {
         const fileReader = new FileReader()
-        fileReader.onload = () => {
-            const results = detectBeacon(fileReader.result)
+        fileReader.onload = async () => {
+            toggleVisibility(initialState, workingState)
+            const results = await detectBeacon(fileReader.result)
+            handleBeaconResults(results)
+            toggleVisibility(workingState, finishedState)
         }
         fileReader.readAsDataURL(file)
     }

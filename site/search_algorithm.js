@@ -1,4 +1,4 @@
-import { SPECTRAL_CLASSES } from "./constants.js"
+import { SPECTRAL_CLASSES } from "./constants_helpers.js"
 
 //fetch the map data, determine neighbor class counts
 const MAP_DATA = await (await fetch("./map.json")).json()

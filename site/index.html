@@ -44,29 +44,46 @@
 
     <dialog id="image-modal">
         <h2>Image Detector</h2>
-        <p>Paste an image below, or click to upload.</p>
-        <div id="upload-area"></div>
         <button id="close-image-modal" class="material-symbols-outlined">close</button>
-        <input 
-            type="file" 
-            id="modal-image-uploader"
-            accept="image/jpeg, image/png, image/jpg"
-        >
+        <div id="initial-state">
+            <p>Paste an image below, or click to upload.</p>
+            <div id="upload-area"></div>
+            <input 
+                type="file" 
+                id="modal-image-uploader"
+                accept="image/jpeg, image/png, image/jpg"
+            >
+        </div>
+        <div id="working-state">
+            <p>Working...</p>
+        </div>
+        <div id="finished-state">
+            <p>
+                <br><br><br>
+                Results found! Make sure you double-check them, image detectors tend to be prone to error. <br> <br>
+                If your results are completely wrong, submit an issue on the <a href="https://github.com/JoRyJuKy/beaconsolver/issues">GitHub</a>, or send <code>joryjuky</code> a DM on Discord with the beacon image attached. <br><br>
+                Press the close button to return to the solver.
+            </p>
+        </div>
     </dialog>
     
-    <svg xmlns="http://www.w3.org/2000/svg" id="lines"></svg>
+    <svg xmlns="http://www.w3.org/2000/svg" class="lines" id="main-lines"></svg>
+    <svg xmlns="http://www.w3.org/2000/svg" class="lines">
+        <line id="edit-line"></line>
+    </svg>
     
     
     <p style="margin: 0px;">
         Found a bug, or need help? Use the <a href="https://github.com/JoRyJuKy/beaconsolver">GitHub</a>, or send me a message/DM on Discord: <code>joryjuky</code><br>
         Credit to <a href="https://github.com/Aloroid">Megustral</a> for the system data, as well as BinaryTimeLord and <a href="https://www.roblox.com/games/10097597282/Starscape-Beacons">R_zgriz's Game</a> for inspiration/ideas <br>
     </p>
-    <h3>Update Log:</h3>
-    <ul>
-        <li><code>v1.1.0</code>: Does not list non-wild systems as results for beacons. Also updated the instructions to make the ability to remove links a bit more obvious</li>
-        <li><code>v1.1.1</code>: Adjusted button colors, updated credits/source/help section, made instructions a bit more clear. Thanks for all the feedback!</li>
-        <li><code>v1.1.2</code>: Internal refactor, should make further updates easier</li>
+    <h3 style="margin-bottom: 0px;">Update Log:</h3>
+    <ul style="margin-top: 0px;">
+        <li><code>v1.3.0</code>: Added an image detector for faster beacon solving! Try it out with the button in the instructions section.</li>
         <li><code>v1.2.0</code>: Change solver to use a primary star (changed with double-clicking), update results to have warnings.</li>
+        <li><code>v1.1.2</code>: Internal refactor, should make further updates easier</li>
+        <li><code>v1.1.1</code>: Adjusted button colors, updated credits/source/help section, made instructions a bit more clear. Thanks for all the feedback!</li>
+        <li><code>v1.1.0</code>: Does not list non-wild systems as results for beacons. Also updated the instructions to make the ability to remove links a bit more obvious</li>
     </ul>
     <!-- preparing for loading OpenCV -->
     <script> let Module = {} </script>

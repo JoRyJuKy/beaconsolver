@@ -19,9 +19,22 @@ h3 {
     margin-left: 0px;
 }
 button { user-select: none ;}
+
+.lines {
+    position:absolute;
+    top:0;
+    left:0;
+    width: 1px;
+    height: 1px;
+    overflow: visible;
+    stroke:var(--white-color);
+    stroke-width: 2px;
+}
+
 #main-container {
     display: flex;
     flex-direction: row;
+    position: relative; /* I don't know why, but this fixes stars jumping when the modal opens. Css, I guess*/
 }
 
 #side {
@@ -72,7 +85,6 @@ button { user-select: none ;}
     width: var(--area-size);
     height: var(--area-size);
     border: var(--white-color) 1px solid;
-
 }
 #stars>*{
     position: absolute;
@@ -94,15 +106,6 @@ button { user-select: none ;}
     border-radius: 100%;
 }
 
-#lines {
-    position:absolute;
-    top:0;
-    left:0;
-    width: 1px;
-    height: 1px;
-    overflow: visible;
-    stroke:var(--white-color);
-    stroke-width: 2px;
-}
+
 
 

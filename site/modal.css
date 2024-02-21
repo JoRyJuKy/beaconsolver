@@ -6,6 +6,7 @@
     filter: blur(0px);
 }
 
+
 #open-image-modal {
     width: 95%;
     height: 35px;
@@ -31,11 +32,7 @@
     
     background-color: #0c090a;
     border: var(--white-color) 1px solid;
-
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-
+    
     z-index: -1;
     opacity: 0;
     transition: opacity 0.2s ease-in;
@@ -48,10 +45,23 @@
     margin: 0px;
     text-align: center;
 }
+#image-modal > div {
+    height: 90%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+#image-modal > div > * {
+    margin: 0px;
+    margin-top: 7px;
+}
+#image-modal > div > p {
+    width: 60%;
+}
 
 #upload-area {
     width: 80%;
-    height: 70%;
+    height: 80%;
     margin-top: 20px;
     border: gray dashed 2px;
 }
@@ -64,7 +74,7 @@
     padding: 0px;
     width: 32px;
     height: 32px;
-
+    
     position: absolute;
     right: 8px;
     top: 8px;
