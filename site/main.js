@@ -289,6 +289,8 @@ const openCVReady = () => {
                 connectionMap.set(connection,      ["2", line])
             })
         }
+        //then, update the results
+        updateResults()
     }
 
     const processFile = (file) => {
