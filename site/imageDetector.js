@@ -53,20 +53,21 @@ const detectBeacon = (urlData) => new Promise(resolve => {
             starsMask = new cv.Mat()
         cv.threshold(sourceImage, lineMask, 20, 255, cv.THRESH_BINARY)
         cv.threshold(sourceImage, starsMask, 60, 255, cv.THRESH_BINARY)
+        sourceImage.delete()
         cv.subtract(lineMask, starsMask, lineMask, new cv.Mat(), -1); 
-        starsMask.delete()
+        
 
         cv.GaussianBlur( //blur source image
-            sourceImage, sourceImage,
+            starsMask, starsMask,
             new cv.Size(5, 5),
             0, 0, cv.BORDER_DEFAULT
         )
         cv.HoughCircles( //detect cirlces
-            sourceImage, rawCircles,
+            starsMask, rawCircles,
             cv.HOUGH_GRADIENT,
             1, 5, 75, 15, 0, 5
-        ); 
-        sourceImage.delete()
+        );
+        starsMask.delete()
 
         const circles = windows(rawCircles.data32F, 3)
             .map(([x, y, r]) => ({x, y, r}))
@@ -86,39 +87,53 @@ const detectBeacon = (urlData) => new Promise(resolve => {
         }`
 
         const isLinePixel = (x, y) => lineMask.ucharAt(y, x) > 50
+        const circlesAreClose = (c1, c2) => Math.abs(c1.x - c2.x) < 1.2 && Math.abs(c1.y - c2.y) < 1.2
+        const lineIntersectsCircle = (m, yInt, cx, cy, r) => {
+            // determines whether a line (represented by its slope m and y intercept yInt) intersects a circle\
+            // circle has cx x pos, cy y pos, and r radius
+            // works by finding discriminant of intersection quadratic, if it is >= 0 then there is some intersection
+            // https://www.desmos.com/calculator/mlvhm99j8z
+            
+            const a = m**2 + 1
+            const b = 2 * ((m * yInt) - (m * cy) - cx)
+            const c = (yInt**2) + (cx**2) + (cy**2) - (r**2) - (2 * yInt * cy)
+            const disc = (b ** 2) - (4*a*c)
+            return disc >= 0
+        }
         const lineIsValid = (x1, y1, r1, x2, y2, r2) => {
+            //variables n functions 4 getting points
             const slope = (y1 - y2)/(x1 - x2)
-            let nMatches = 0,
-                nNot     = 0,
-                nOnStar  = 0
+            const smallerY = x1 < x2 ? y1 : y2
+            const smallerX = y1 < y2 ? x1 : x2
+            const getY = x => slope * (x - Math.min(x1, x2)) + smallerY
+            const getX = y => smallerX - ((Math.min(y1, y2) - y)/slope)
 
+            //check that no circle intersects this line, if there is it is invalid
+            if (circles.some(c => {
+                if ( //circle is beyond the rect bounded by the two other circles
+                    Math.abs(x1 - c.x) + Math.abs(x2 - c.x) != Math.abs(x1 - x2) ||
+                    Math.abs(y1 - c.y) + Math.abs(y2 - c.y) != Math.abs(y1 - y2)
+                ) return false
+
+                return lineIntersectsCircle(slope, getY(0), c.x, c.y, c.r) &&
+                !circlesAreClose(c, {x: x1, y: y1}) &&
+                !circlesAreClose(c, {x: x2, y: y2})
+            })) return false
+
+            //loops stuff:
+            let nMatches = 0, //state vars for loops
+                nNot     = 0
             const handlePoint = (x, y) => {
                 if (dist(x, y, x1, y1) <= r1) return
                 if (dist(x, y, x2, y2) <= r2) return
-
-                if (circles.some(c => dist(x, y, c.x, c.y) < c.r)) {
-                    nOnStar++
-                    return
-                }
                 if (isLinePixel(x, y)) nMatches++
                 else nNot++
             }
-
-            //x loop part
-            const smallerY = x1 < x2 ? y1 : y2
-            const getY = x => slope * (x - Math.min(x1, x2)) + smallerY
-            for (let x = Math.min(x1, x2); x < Math.max(x1, x2); x++) {
-                if (nOnStar > 2) return false
+            //loop over all integer points on line, handle them
+            for (let x = Math.min(x1, x2); x < Math.max(x1, x2); x++)
                 handlePoint(x, getY(x))
-            }
-
-            // y loop part
-            const smallerX = y1 < y2 ? x1 : x2
-            const getX = y => smallerX - ((Math.min(y1, y2) - y)/slope)
-            for (let y = Math.min(y1, y2); y < Math.max(y1, y2); y++) {
-                if (nOnStar > 2) return false
+            for (let y = Math.min(y1, y2); y < Math.max(y1, y2); y++)
                 handlePoint(getX(y), y)
-            }
 
             return nMatches/nNot >= LINE_THRESHOLD
         }
