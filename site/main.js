@@ -293,9 +293,16 @@ const openCVReady = () => {
         const fileReader = new FileReader()
         fileReader.onload = async () => {
             toggleVisibility(initialState, workingState)
-            const results = await detectBeacon(fileReader.result)
-            handleBeaconResults(results)
-            toggleVisibility(workingState, finishedState)
+            try {
+                const results = await detectBeacon(fileReader.result)
+                handleBeaconResults(results)
+                toggleVisibility(workingState, finishedState)
+            } catch (err) {
+                toggleVisibility(workingState, initialState)
+                modal.close()
+                console.error(err)
+                alert("Encountered an error when detecting image! It has been logged to the console, please report it to @joryjuky on Discord, or open an issue on the GitHub.")
+            }
         }
         fileReader.readAsDataURL(file)
     }

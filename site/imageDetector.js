@@ -14,7 +14,7 @@ const colorIsClose = (color1Hex, color2RGB, thresh) =>
 //finds an estimated spectral class based on pixel color
 const findSpectralClass = (pixelColor) => {
     const filteredColors = Object.entries(COLORS)
-        .filter(([_, hexCode]) => colorIsClose(hexCode, pixelColor, 5))
+        .filter(([_, hexCode]) => colorIsClose(hexCode, pixelColor, 20))
     
     if (filteredColors.length == 0) return null
     return filteredColors[0][0]
@@ -40,6 +40,7 @@ const detectBeacon = (urlData) => new Promise(resolve => {
     image.onload = () => {
         canvas.width = image.width
         canvas.height = image.height
+
         ctx.drawImage(image, 0, 0)
 
         const sourceImage = cv.imread(canvas),
@@ -65,12 +66,22 @@ const detectBeacon = (urlData) => new Promise(resolve => {
         cv.HoughCircles( //detect cirlces
             starsMask, rawCircles,
             cv.HOUGH_GRADIENT,
-            1, 5, 75, 15, 0, 5
-        );
+            1, 5, 75, 15, 0, 5 //5
+        )
+        if (rawCircles.data32F.length == 0) {
+            cv.HoughCircles( //detect cirlces
+                starsMask, rawCircles,
+                cv.HOUGH_GRADIENT,
+                1, 5, 75, 15, 0, 9
+            )
+        }
         starsMask.delete()
 
         const circles = windows(rawCircles.data32F, 3)
-            .map(([x, y, r]) => ({x, y, r}))
+            .filter(([x, y, _]) => findSpectralClass(
+                ctx.getImageData(x, y, 1, 1).data.slice(0, 3)
+            ) != null)
+            .map   (([x, y, r]) => ({x, y, r}))
         rawCircles.delete();
 
         const xS = circles.map(({x}) => x).sort((x1, x2) => x1-x2);
@@ -81,9 +92,9 @@ const detectBeacon = (urlData) => new Promise(resolve => {
               largestY  = yS[yS.length-1] - smallestY,
               largest   = Math.max(largestX, largestY)
         const toKey = (x, y) => `${
-            Math.round(((x - smallestX - ((largestX - largest) / 2)))/largest * 600) + 75
+            Math.floor(((x - smallestX - ((largestX - largest) / 2)))/largest * 600) + 75
         }_${
-            Math.round(((y - smallestY - ((largestY - largest) / 2)))/largest * 600) + 75
+            Math.floor(((y - smallestY - ((largestY - largest) / 2)))/largest * 600) + 75
         }`
 
         const isLinePixel = (x, y) => lineMask.ucharAt(y, x) > 50
