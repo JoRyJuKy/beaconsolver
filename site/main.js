@@ -1,6 +1,6 @@
 import { COLORS, STAR_RAD, setLinePositions } from "./constants_helpers.js"
 import { solveBeacon } from "./search_algorithm.js"
-import { detectBeacon } from "./imageDetector.js"
+import { detectBeacon } from "./image_detector.js"
 
 const buttons = document.getElementById("star-buttons")
 const stars = document.getElementById("stars")
