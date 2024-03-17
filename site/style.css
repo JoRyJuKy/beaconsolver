@@ -5,7 +5,6 @@
 }
 
 html {
-    user-select: none;
     color: var(--white-color);
     background-color: #0c090a;
     font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -18,7 +17,6 @@ h3 {
     margin: 5px;
     margin-left: 0px;
 }
-button { user-select: none ;}
 
 kbd {
     /* credit to the mdn page for this styling */
@@ -30,6 +28,7 @@ kbd {
     padding: 0.25rem;
     color: #cdcdcd;
 }
+
 
 .lines {
     position:absolute;
@@ -46,6 +45,9 @@ kbd {
     display: flex;
     flex-direction: row;
     position: relative; /* I don't know why, but this fixes stars jumping when the modal opens. Css, I guess*/
+}
+#main-container > section:nth-child(1) {
+    user-select: none;
 }
 
 #side {

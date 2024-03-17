@@ -328,5 +328,3 @@ Module.onRuntimeInitialized = openCVReady
 openCVScriptElement.async = true
 openCVScriptElement.src = "https://docs.opencv.org/4.9.0/opencv.js"
 document.body.appendChild(openCVScriptElement)
-
-alert("Warning: Some results may be incorrect due to small changes made to the map in the latest starscape update. I'm working on getting updated map data, in the meantime this should be largely fine to use. If you know of map data, please shoot me a DM on discord: joryjuky")
